@@ -149,15 +149,6 @@ class MultiAgentSwarm:
         
         self.logger.log_system_init("MultiAgentSwarm 初始化完成", init_summary)
         
-        print(f"✅ MultiAgentSwarm 初始化完成")
-        print(f"📊 Model: {self.model.config['model_id']}")
-        print(f"🔧 Basic Tools: {len(self.basic_tools)} 个")
-        print(f"🔌 MCP Tools: {len(self.mcp_tools)} 个")
-        print(f"⚙️  Swarm Config: {self.config_file}")
-        print(f"🤖 Agents: {len(self.agents)} 个专业化代理已创建")
-        print(f"📝 日志会话ID: {self.logger.session_id}")
-        print(f"📈 性能监控: {'启用' if self.performance_monitor.enable_real_time_monitoring else '禁用'}")
-        print(f"🚦 限流处理: 启用 (最大重试{self.throttling_handler.config.max_retries}次, {self.throttling_handler.config.strategy.value}策略)")
     
     def _initialize_model(self):
         """初始化模型"""
@@ -182,21 +173,17 @@ class MultiAgentSwarm:
         """初始化整个多代理系统 - 添加完整的错误处理和回退机制"""
         try:
             self.logger.log_system_init("开始初始化多代理系统")
-            print("🚀 开始初始化多代理系统...")
             
             # 第一步：创建专业化代理
             self.logger.log_system_init("第1步：创建专业化代理")
-            print("📋 第1步：创建专业化代理...")
             self.create_specialized_agents()
             
             # 第二步：创建Swarm实例
             self.logger.log_system_init("第2步：创建 Swarm 实例")
-            print("🔧 第2步：创建 Swarm 实例...")
             self.create_swarm()
             
             # 第三步：验证系统状态
             self.logger.log_system_init("第3步：验证系统状态")
-            print("✅ 第3步：验证系统状态...")
             self._validate_system_state()
             
             success_details = {
@@ -206,10 +193,6 @@ class MultiAgentSwarm:
             }
             
             self.logger.log_system_init("多代理系统初始化成功", success_details)
-            print(f"🎯 多代理系统初始化成功")
-            print(f"   - 代理数量: {len(self.agents)}")
-            print(f"   - Swarm 状态: {'已创建' if self.swarm else '未创建'}")
-            print(f"   - 配置文件: {self.config_file}")
             
         except Exception as e:
             error_details = {
@@ -220,8 +203,6 @@ class MultiAgentSwarm:
             }
             
             self.logger.log_error("系统初始化失败", error_details)
-            print(f"❌ 系统初始化失败: {e}")
-            print("🔧 尝试清理已创建的资源...")
             
             # 清理部分创建的资源
             try:
@@ -232,7 +213,6 @@ class MultiAgentSwarm:
                 self.logger.log_info("资源清理完成")
             except Exception as cleanup_error:
                 self.logger.log_error("资源清理时出错", {"cleanup_error": str(cleanup_error)})
-                print(f"⚠️  资源清理时出错: {cleanup_error}")
             
             # 重新抛出原始异常
             raise Exception(f"多代理系统初始化失败: {e}")
@@ -262,7 +242,6 @@ class MultiAgentSwarm:
         if errors:
             raise Exception(f"系统状态验证失败: {'; '.join(errors)}")
         
-        print("✅ 系统状态验证通过")
     
     def _load_swarm_config(self) -> Dict[str, Any]:
         """加载 Swarm 配置 - 配置管理功能，添加错误处理和回退机制"""
@@ -274,38 +253,27 @@ class MultiAgentSwarm:
                 # 验证配置完整性
                 self._validate_config(config)
                 
-                print(f"✅ 加载 Swarm 配置: {self.config_file}")
                 return config
             else:
-                print(f"⚠️  配置文件 {self.config_file} 不存在，创建默认配置")
                 default_config = self._get_default_config()
                 self._save_config(default_config)
                 return default_config
                 
         except json.JSONDecodeError as e:
-            print(f"❌ 配置文件 JSON 格式错误: {e}")
-            print("🔧 尝试修复配置文件...")
             return self._handle_config_error("json_decode_error")
             
         except ValueError as e:
-            print(f"❌ 配置验证失败: {e}")
-            print("🔧 尝试修复配置文件...")
             return self._handle_config_error("validation_error")
             
         except FileNotFoundError:
-            print(f"⚠️  配置文件 {self.config_file} 不存在，创建默认配置")
             default_config = self._get_default_config()
             self._save_config(default_config)
             return default_config
             
         except PermissionError:
-            print(f"❌ 无权限访问配置文件 {self.config_file}")
-            print("⚠️  使用默认配置，但无法保存")
             return self._get_default_config()
             
         except Exception as e:
-            print(f"❌ 加载配置时发生未知错误: {e}")
-            print("⚠️  使用默认配置")
             return self._get_default_config()
     
     def _handle_config_error(self, error_type: str) -> Dict[str, Any]:
@@ -318,7 +286,6 @@ class MultiAgentSwarm:
         Returns:
             修复后的配置或默认配置
         """
-        print(f"🔧 处理配置错误: {error_type}")
         
         # 尝试备份损坏的配置文件
         if os.path.exists(self.config_file):
@@ -326,31 +293,19 @@ class MultiAgentSwarm:
             try:
                 import shutil
                 shutil.copy2(self.config_file, backup_file)
-                print(f"📁 已备份损坏的配置文件到: {backup_file}")
             except Exception as e:
-                print(f"⚠️  无法备份配置文件: {e}")
         
         # 根据错误类型提供修复建议
         if error_type == "json_decode_error":
-            print("💡 修复建议:")
-            print("   1. 检查 JSON 语法是否正确（括号、逗号、引号）")
-            print("   2. 使用 JSON 验证工具检查格式")
-            print("   3. 参考默认配置文件格式")
             
         elif error_type == "validation_error":
-            print("💡 修复建议:")
-            print("   1. 检查必需的配置项是否存在")
-            print("   2. 验证参数类型和取值范围")
-            print("   3. 确保所有必需的代理都已配置")
         
         # 创建并保存默认配置
         default_config = self._get_default_config()
         
         try:
             self._save_config(default_config)
-            print("✅ 已创建新的默认配置文件")
         except Exception as e:
-            print(f"⚠️  无法保存默认配置: {e}")
         
         return default_config
     
@@ -411,25 +366,20 @@ class MultiAgentSwarm:
         
         # 输出验证结果
         if validation_errors:
-            print("⚠️  配置验证发现以下问题:")
             for error in validation_errors:
-                print(f"   - {error}")
             
             # 如果是关键错误，抛出异常
             critical_errors = [e for e in validation_errors if "缺少必需" in e or "必须是" in e]
             if critical_errors:
                 raise ValueError(f"配置验证失败: {'; '.join(critical_errors)}")
         else:
-            print("✅ 配置验证通过")
     
     def _save_config(self, config: Dict[str, Any]) -> None:
         """保存配置到文件"""
         try:
             with open(self.config_file, 'w', encoding='utf-8') as f:
                 json.dump(config, f, indent=2, ensure_ascii=False)
-            print(f"✅ 配置已保存到: {self.config_file}")
         except Exception as e:
-            print(f"⚠️  保存配置失败: {e}")
     
     def _get_default_config(self) -> Dict[str, Any]:
         """获取默认配置"""
@@ -538,14 +488,11 @@ class MultiAgentSwarm:
             new_swarm_config = new_config.get("swarm_config", {})
             
             if old_swarm_config != new_swarm_config:
-                print("🔄 Swarm 配置已更改，重新创建 Swarm 实例...")
                 self.create_swarm()
             
-            print("✅ Swarm 配置更新成功")
             return True
             
         except Exception as e:
-            print(f"❌ 配置更新失败: {e}")
             # 恢复原配置
             if 'old_config' in locals():
                 self.swarm_config = old_config
@@ -559,19 +506,15 @@ class MultiAgentSwarm:
             重新加载是否成功
         """
         try:
-            print(f"🔄 重新加载配置文件: {self.config_file}")
             new_config = self._load_swarm_config()
             
             # 检查配置是否有变化
             if new_config != self.swarm_config:
-                print("📝 检测到配置变化，应用新配置...")
                 return self.update_swarm_config(new_config)
             else:
-                print("✅ 配置无变化")
                 return True
                 
         except Exception as e:
-            print(f"❌ 重新加载配置失败: {e}")
             return False
     
     def _setup_basic_tools(self):
@@ -592,13 +535,10 @@ class MultiAgentSwarm:
                 if tool_func:
                     self.basic_tools.append(tool_func)
                     tool_init_results[tool_name] = {"status": "success", "error": None}
-                    print(f"✅ {tool_name} 工具初始化成功")
                 else:
                     tool_init_results[tool_name] = {"status": "failed", "error": "Tool function is None"}
-                    print(f"⚠️  {tool_name} 工具不可用")
             except Exception as e:
                 tool_init_results[tool_name] = {"status": "failed", "error": str(e)}
-                print(f"⚠️  {tool_name} 工具初始化失败: {e}")
         
         # 尝试初始化 AgentCore 工具（可能失败）
         advanced_tools = [
@@ -612,13 +552,10 @@ class MultiAgentSwarm:
                 if tool:
                     self.basic_tools.append(tool)
                     tool_init_results[tool_name] = {"status": "success", "error": None}
-                    print(f"✅ {tool_name} 工具初始化成功")
                 else:
                     tool_init_results[tool_name] = {"status": "failed", "error": "Tool initialization returned None"}
-                    print(f"⚠️  {tool_name} 工具初始化返回空值")
             except Exception as e:
                 tool_init_results[tool_name] = {"status": "failed", "error": str(e)}
-                print(f"⚠️  {tool_name} 工具初始化失败: {e}")
                 self._provide_tool_error_guidance(tool_name, e)
         
         # 验证至少有基础工具可用
@@ -633,7 +570,6 @@ class MultiAgentSwarm:
             "init_results": tool_init_results
         })
         
-        print(f"🎯 基础工具初始化完成: {len(self.basic_tools)} 个工具可用")
         
         # 如果有工具初始化失败，提供修复建议
         failed_tools = [name for name, result in tool_init_results.items() if result["status"] == "failed"]
@@ -646,11 +582,8 @@ class MultiAgentSwarm:
             agentcore_code_interpreter = AgentCoreCodeInterpreter(region="us-east-1")
             return agentcore_code_interpreter.code_interpreter
         except ImportError as e:
-            print(f"   💡 代码解释器依赖缺失: {e}")
-            print(f"   建议: pip install agentcore-code-interpreter")
             return None
         except Exception as e:
-            print(f"   💡 代码解释器初始化错误: {e}")
             return None
     
     def _init_browser(self):
@@ -659,11 +592,8 @@ class MultiAgentSwarm:
             agentcore_browser = AgentCoreBrowser(region="us-east-1")
             return agentcore_browser.browser
         except ImportError as e:
-            print(f"   💡 浏览器工具依赖缺失: {e}")
-            print(f"   建议: pip install agentcore-browser")
             return None
         except Exception as e:
-            print(f"   💡 浏览器工具初始化错误: {e}")
             return None
     
     def _provide_tool_error_guidance(self, tool_name: str, error: Exception):
@@ -671,46 +601,22 @@ class MultiAgentSwarm:
         error_type = type(error).__name__
         error_msg = str(error)
         
-        print(f"   🔧 {tool_name} 错误诊断:")
         
         if error_type == "ImportError":
-            print(f"   💡 依赖包缺失，建议安装:")
             if "code_interpreter" in tool_name:
-                print(f"      pip install agentcore-code-interpreter")
             elif "browser" in tool_name:
-                print(f"      pip install agentcore-browser")
             else:
-                print(f"      检查相关依赖包是否已安装")
         
         elif error_type == "ConnectionError" or "connection" in error_msg.lower():
-            print(f"   💡 网络连接问题:")
-            print(f"      1. 检查网络连接")
-            print(f"      2. 检查防火墙设置")
-            print(f"      3. 验证 AWS 区域配置")
         
         elif error_type == "PermissionError" or "permission" in error_msg.lower():
-            print(f"   💡 权限问题:")
-            print(f"      1. 检查 AWS 凭证配置")
-            print(f"      2. 验证 IAM 权限")
-            print(f"      3. 检查环境变量设置")
         
         elif "region" in error_msg.lower():
-            print(f"   💡 区域配置问题:")
-            print(f"      1. 检查 AWS_REGION 环境变量")
-            print(f"      2. 验证区域名称是否正确")
-            print(f"      3. 确认服务在该区域可用")
         
         else:
-            print(f"   💡 通用修复建议:")
-            print(f"      1. 检查环境变量配置")
-            print(f"      2. 验证依赖包版本")
-            print(f"      3. 查看详细错误日志")
-            print(f"      错误详情: {error_msg}")
     
     def _provide_tool_recovery_suggestions(self, failed_tools: List[str], tool_results: Dict[str, Dict]):
         """提供工具恢复建议"""
-        print(f"\n🔧 工具初始化问题修复建议:")
-        print(f"失败的工具: {', '.join(failed_tools)}")
         
         # 按错误类型分组建议
         import_errors = []
@@ -730,30 +636,13 @@ class MultiAgentSwarm:
                 other_errors.append(tool_name)
         
         if import_errors:
-            print(f"\n📦 依赖包问题 ({', '.join(import_errors)}):")
-            print(f"   pip install agentcore-code-interpreter agentcore-browser")
-            print(f"   或检查具体的依赖包安装")
         
         if connection_errors:
-            print(f"\n🌐 网络连接问题 ({', '.join(connection_errors)}):")
-            print(f"   1. 检查网络连接")
-            print(f"   2. 验证 AWS 服务可达性")
-            print(f"   3. 检查防火墙和代理设置")
         
         if permission_errors:
-            print(f"\n🔐 权限问题 ({', '.join(permission_errors)}):")
-            print(f"   1. 配置 AWS 凭证: aws configure")
-            print(f"   2. 检查 IAM 权限")
-            print(f"   3. 验证环境变量: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY")
         
         if other_errors:
-            print(f"\n❓ 其他问题 ({', '.join(other_errors)}):")
-            print(f"   1. 检查系统环境配置")
-            print(f"   2. 查看详细错误日志")
-            print(f"   3. 尝试重新启动系统")
         
-        print(f"\n💡 系统仍可使用基础工具继续工作，高级功能可能受限。")
-        print(f"   修复工具问题后，可使用 reload_config() 重新加载配置。")
     
     def _setup_mcp(self):
         """设置MCP连接 - 处理MCP初始化失败，提供清晰的错误提示信息"""
@@ -764,7 +653,6 @@ class MultiAgentSwarm:
         try:
             # 检查MCP配置文件
             if not os.path.exists("mcp_config.json"):
-                print("⚠️  未找到mcp_config.json，跳过MCP集成")
                 self._create_default_mcp_config()
                 return
             
@@ -774,12 +662,10 @@ class MultiAgentSwarm:
                     config = json.load(f)
             except json.JSONDecodeError as e:
                 error_msg = f"MCP配置文件JSON格式错误: {e}"
-                print(f"❌ {error_msg}")
                 self._handle_mcp_config_error("json_decode_error", error_msg)
                 return
             except Exception as e:
                 error_msg = f"读取MCP配置文件失败: {e}"
-                print(f"❌ {error_msg}")
                 self._handle_mcp_config_error("file_read_error", error_msg)
                 return
             
@@ -790,15 +676,12 @@ class MultiAgentSwarm:
             # 连接所有启用的服务器
             servers = config.get("mcpServers", {})
             if not servers:
-                print("⚠️  MCP配置中没有定义服务器")
                 return
             
-            print(f"🔌 开始连接 {len(servers)} 个MCP服务器...")
             
             for name, server_config in servers.items():
                 if server_config.get("disabled", False):
                     mcp_init_results[name] = {"status": "disabled", "error": None}
-                    print(f"⏸️  MCP服务器 {name} 已禁用")
                     continue
                 
                 # 尝试连接单个MCP服务器
@@ -822,22 +705,16 @@ class MultiAgentSwarm:
             
             # 输出汇总信息
             if successful_servers:
-                print(f"✅ 成功连接MCP服务器: {', '.join(successful_servers)}")
-                print(f"🎯 总计MCP工具: {len(self.mcp_tools)} 个")
             
             if failed_servers:
-                print(f"❌ 连接失败的MCP服务器: {', '.join(failed_servers)}")
                 self._provide_mcp_recovery_suggestions(failed_servers, mcp_init_results)
             
             if disabled_servers:
-                print(f"⏸️  已禁用的MCP服务器: {', '.join(disabled_servers)}")
             
             if not successful_servers and not disabled_servers:
-                print("⚠️  没有成功连接任何MCP服务器，系统将仅使用基础工具")
                 
         except Exception as e:
             error_msg = f"MCP设置过程中发生未知错误: {e}"
-            print(f"❌ {error_msg}")
             self.logger.log_error("MCP设置失败", {"error": error_msg})
             self._handle_mcp_config_error("unknown_error", error_msg)
     
@@ -881,20 +758,16 @@ class MultiAgentSwarm:
         
         # 输出验证结果
         if validation_errors:
-            print("❌ MCP配置验证失败:")
             for error in validation_errors:
-                print(f"   - {error}")
             
             self._provide_mcp_config_fix_suggestions(validation_errors)
             return False
         else:
-            print("✅ MCP配置验证通过")
             return True
     
     def _connect_mcp_server(self, name: str, server_config: Dict[str, Any]) -> Dict[str, Any]:
         """连接单个MCP服务器"""
         try:
-            print(f"🔌 连接MCP服务器: {name}")
             
             # 验证服务器配置
             if not server_config.get("command"):
@@ -922,7 +795,6 @@ class MultiAgentSwarm:
             self.mcp_clients.append((name, mcp_client))
             self.mcp_tools.extend(tools)
             
-            print(f"✅ {name} 连接成功，获得 {len(tools)} 个工具")
             
             return {
                 "status": "success", 
@@ -934,53 +806,34 @@ class MultiAgentSwarm:
             
         except FileNotFoundError as e:
             error_msg = f"命令不存在: {server_config.get('command', 'unknown')}"
-            print(f"❌ {name} 连接失败: {error_msg}")
             return {"status": "failed", "error": error_msg, "error_type": "command_not_found"}
             
         except PermissionError as e:
             error_msg = f"权限不足: {e}"
-            print(f"❌ {name} 连接失败: {error_msg}")
             return {"status": "failed", "error": error_msg, "error_type": "permission_error"}
             
         except ConnectionError as e:
             error_msg = f"连接错误: {e}"
-            print(f"❌ {name} 连接失败: {error_msg}")
             return {"status": "failed", "error": error_msg, "error_type": "connection_error"}
             
         except TimeoutError as e:
             error_msg = f"连接超时: {e}"
-            print(f"❌ {name} 连接失败: {error_msg}")
             return {"status": "failed", "error": error_msg, "error_type": "timeout_error"}
             
         except Exception as e:
             error_msg = f"未知错误: {e}"
-            print(f"❌ {name} 连接失败: {error_msg}")
             return {"status": "failed", "error": error_msg, "error_type": "unknown_error"}
     
     def _handle_mcp_config_error(self, error_type: str, error_msg: str):
         """处理MCP配置错误"""
-        print(f"🔧 处理MCP配置错误: {error_type}")
         
         if error_type == "json_decode_error":
-            print("💡 JSON格式错误修复建议:")
-            print("   1. 检查JSON语法（括号、逗号、引号）")
-            print("   2. 使用JSON验证工具检查格式")
-            print("   3. 参考示例配置文件")
             
         elif error_type == "file_read_error":
-            print("💡 文件读取错误修复建议:")
-            print("   1. 检查文件权限")
-            print("   2. 确认文件路径正确")
-            print("   3. 检查文件是否被其他程序占用")
             
         elif error_type == "unknown_error":
-            print("💡 通用错误修复建议:")
-            print("   1. 检查系统环境")
-            print("   2. 重新启动应用")
-            print("   3. 查看详细错误日志")
         
         # 尝试创建默认配置
-        print("🔧 尝试创建默认MCP配置...")
         self._create_default_mcp_config()
     
     def _create_default_mcp_config(self):
@@ -1000,30 +853,17 @@ class MultiAgentSwarm:
             with open("mcp_config.json", 'w', encoding='utf-8') as f:
                 json.dump(default_config, f, indent=2, ensure_ascii=False)
             
-            print("✅ 已创建默认MCP配置文件: mcp_config.json")
-            print("💡 请根据需要修改配置并启用所需的服务器")
             
         except Exception as e:
-            print(f"❌ 创建默认MCP配置失败: {e}")
     
     def _provide_mcp_config_fix_suggestions(self, validation_errors: List[str]):
         """提供MCP配置修复建议"""
-        print("\n🔧 MCP配置修复建议:")
         
         # 按错误类型分组建议
         if any("缺少" in error for error in validation_errors):
-            print("📝 缺少必需字段:")
-            print("   确保每个服务器都有 'command' 和 'args' 字段")
             
         if any("类型" in error for error in validation_errors):
-            print("🔤 字段类型错误:")
-            print("   - command: 字符串类型")
-            print("   - args: 数组类型")
-            print("   - env: 对象类型")
-            print("   - disabled: 布尔类型")
         
-        print("\n📋 示例配置:")
-        print("""   {
      "mcpServers": {
        "my-server": {
          "command": "uvx",
@@ -1036,7 +876,6 @@ class MultiAgentSwarm:
     
     def _provide_mcp_recovery_suggestions(self, failed_servers: List[str], results: Dict[str, Dict]):
         """提供MCP恢复建议"""
-        print(f"\n🔧 MCP服务器连接问题修复建议:")
         
         # 按错误类型分组
         command_errors = []
@@ -1061,37 +900,15 @@ class MultiAgentSwarm:
                 other_errors.append(server_name)
         
         if command_errors:
-            print(f"\n📦 命令不存在 ({', '.join(command_errors)}):")
-            print(f"   1. 安装所需的MCP服务器: pip install <package-name>")
-            print(f"   2. 检查命令路径是否正确")
-            print(f"   3. 确认命令在系统PATH中")
         
         if permission_errors:
-            print(f"\n🔐 权限问题 ({', '.join(permission_errors)}):")
-            print(f"   1. 检查文件执行权限")
-            print(f"   2. 以适当权限运行程序")
-            print(f"   3. 检查环境变量配置")
         
         if connection_errors:
-            print(f"\n🌐 连接问题 ({', '.join(connection_errors)}):")
-            print(f"   1. 检查网络连接")
-            print(f"   2. 验证服务器地址")
-            print(f"   3. 检查防火墙设置")
         
         if timeout_errors:
-            print(f"\n⏰ 超时问题 ({', '.join(timeout_errors)}):")
-            print(f"   1. 增加连接超时时间")
-            print(f"   2. 检查服务器响应速度")
-            print(f"   3. 优化网络环境")
         
         if other_errors:
-            print(f"\n❓ 其他问题 ({', '.join(other_errors)}):")
-            print(f"   1. 查看详细错误日志")
-            print(f"   2. 检查服务器配置")
-            print(f"   3. 尝试重新启动服务")
         
-        print(f"\n💡 可以暂时禁用有问题的服务器，系统将使用其他可用工具继续工作。")
-        print(f"   在配置文件中设置 'disabled': true 来禁用服务器。")
     
     def create_specialized_agents(self) -> List[Agent]:
         """
@@ -1501,11 +1318,8 @@ class MultiAgentSwarm:
                 }
                 self.logger.log_agent_created(spec.name, agent_details)
                 
-                print(f"✅ 创建代理: {spec.name} - {spec.role_description}")
-                print(f"   工具数量: {len(spec.tools)} 个")
                 
             except Exception as e:
-                print(f"⚠️  创建代理 {spec.name} 失败: {e}")
                 continue
         
         # 验证创建成功的代理数量
@@ -1513,7 +1327,6 @@ class MultiAgentSwarm:
             raise Exception(f"代理创建失败：需要至少4个代理，实际创建了{len(agents)}个")
         
         self.agents = agents
-        print(f"🎯 成功创建 {len(agents)} 个专业化代理")
         return agents
     
     def _get_task_analyzer_tools(self) -> List[Any]:
@@ -1537,7 +1350,6 @@ class MultiAgentSwarm:
         # 添加图像读取工具用于多模态信息处理（需求4.3）
         if image_reader:
             info_tools.append(image_reader)
-            print("   ✅ 已配置 image_reader 工具用于多模态信息处理")
         
         # 添加时间工具用于信息时效性验证
         if current_time:
@@ -1546,7 +1358,6 @@ class MultiAgentSwarm:
         # 添加MCP工具（主要用于信息收集和文档处理）
         if self.mcp_tools:
             info_tools.extend(self.mcp_tools)
-            print(f"   ✅ 已配置 {len(self.mcp_tools)} 个 MCP 工具用于信息收集")
         
         # 不添加计算器、代码执行器等执行工具
         # 这些由 tool_executor 代理负责
@@ -1568,14 +1379,11 @@ class MultiAgentSwarm:
             elif hasattr(tool, 'name'):
                 tool_names.append(tool.name)
         
-        print(f"   ✅ 已配置基础执行工具: {tool_names}")
         
         # 添加所有MCP工具用于扩展功能
         if self.mcp_tools:
             execution_tools.extend(self.mcp_tools)
-            print(f"   ✅ 已配置 {len(self.mcp_tools)} 个 MCP 工具用于执行")
         
-        print(f"   🎯 工具执行代理总计工具数: {len(execution_tools)} 个")
         
         return execution_tools
     
@@ -1592,7 +1400,6 @@ class MultiAgentSwarm:
         # 不添加图像读取器等信息收集工具
         # 专注于结果整合和格式化
         
-        print(f"   ✅ 结果综合代理配置了 {len(synthesizer_tools)} 个基础工具")
         
         return synthesizer_tools
     
@@ -1617,8 +1424,6 @@ class MultiAgentSwarm:
             # 获取 Swarm 配置参数
             swarm_params = self.swarm_config.get("swarm_config", {})
             
-            print("🔧 正在创建 Swarm 实例...")
-            print(f"   配置来源: {self.config_file}")
             
             # 验证代理状态
             self._validate_agents_for_swarm()
@@ -1655,15 +1460,6 @@ class MultiAgentSwarm:
             self.logger.log_swarm_created(swarm_details)
             
             # 输出详细配置信息
-            print(f"✅ Strands Swarm 创建成功")
-            print(f"   代理数量: {len(self.agents)} 个")
-            print(f"   代理列表: {[agent.name for agent in self.agents]}")
-            print(f"   最大移交次数: {swarm_params.get('max_handoffs', 20)}")
-            print(f"   最大迭代次数: {swarm_params.get('max_iterations', 20)}")
-            print(f"   执行超时: {swarm_params.get('execution_timeout', 900.0)}秒")
-            print(f"   节点超时: {swarm_params.get('node_timeout', 300.0)}秒")
-            print(f"   重复移交检测窗口: {swarm_params.get('repetitive_handoff_detection_window', 8)}")
-            print(f"   最少唯一代理数: {swarm_params.get('repetitive_handoff_min_unique_agents', 3)}")
             
             # 记录 Swarm 创建时间用于生命周期管理
             self._swarm_created_at = datetime.now()
@@ -1672,24 +1468,20 @@ class MultiAgentSwarm:
             
         except ImportError as e:
             error_msg = f"Strands Swarm 导入失败: {e}。请确保已正确安装 strands 库"
-            print(f"❌ {error_msg}")
             raise Exception(error_msg)
             
         except TypeError as e:
             error_msg = f"Swarm 参数配置错误: {e}。请检查配置文件中的参数类型"
-            print(f"❌ {error_msg}")
             self._handle_swarm_creation_error("parameter_error", str(e))
             raise Exception(error_msg)
             
         except Exception as e:
             error_msg = f"Swarm 创建失败: {e}"
-            print(f"❌ {error_msg}")
             self._handle_swarm_creation_error("unknown_error", str(e))
             raise Exception(error_msg)
     
     def _validate_agents_for_swarm(self) -> None:
         """验证代理是否适合创建 Swarm"""
-        print("🔍 验证代理状态...")
         
         required_agents = ["task_analyzer", "info_gatherer", "tool_executor", "result_synthesizer"]
         agent_names = [agent.name for agent in self.agents]
@@ -1704,7 +1496,6 @@ class MultiAgentSwarm:
             if not hasattr(agent, 'model') or not agent.model:
                 raise Exception(f"代理 {agent.name} 缺少有效的模型配置")
         
-        print("✅ 代理状态验证通过")
     
     def _handle_swarm_creation_error(self, error_type: str, error_details: str) -> None:
         """
@@ -1714,27 +1505,12 @@ class MultiAgentSwarm:
             error_type: 错误类型
             error_details: 错误详情
         """
-        print(f"🔧 处理 Swarm 创建错误: {error_type}")
         
         if error_type == "parameter_error":
-            print("💡 参数错误修复建议:")
-            print("   1. 检查 swarm_config.json 中的参数类型")
-            print("   2. 确保数值参数为正数")
-            print("   3. 确保整数参数不是浮点数")
-            print("   4. 参考默认配置文件格式")
             
         elif error_type == "agent_error":
-            print("💡 代理错误修复建议:")
-            print("   1. 确保所有必需的代理都已创建")
-            print("   2. 检查代理的模型配置")
-            print("   3. 验证代理的工具配置")
             
         elif error_type == "unknown_error":
-            print("💡 通用错误修复建议:")
-            print("   1. 检查系统资源是否充足")
-            print("   2. 确保 strands 库版本兼容")
-            print("   3. 查看详细错误日志")
-            print(f"   错误详情: {error_details}")
     
     def destroy_swarm(self) -> bool:
         """
@@ -1745,20 +1521,16 @@ class MultiAgentSwarm:
         """
         try:
             if self.swarm:
-                print("🧹 正在销毁 Swarm 实例...")
                 
                 # 清理 Swarm 相关资源
                 self.swarm = None
                 self._swarm_created_at = None
                 
-                print("✅ Swarm 实例已销毁")
                 return True
             else:
-                print("⚠️  Swarm 实例不存在，无需销毁")
                 return True
                 
         except Exception as e:
-            print(f"❌ 销毁 Swarm 实例失败: {e}")
             return False
     
     def recreate_swarm(self) -> bool:
@@ -1769,28 +1541,23 @@ class MultiAgentSwarm:
             重新创建是否成功
         """
         try:
-            print("🔄 重新创建 Swarm 实例...")
             
             # 先销毁现有实例
             self.destroy_swarm()
             
             # 清理现有代理以避免工具冲突
             if self.agents:
-                print("🧹 清理现有代理以避免工具冲突...")
                 self.agents.clear()
             
             # 重新创建代理
-            print("🤖 重新创建专业化代理...")
             self.create_specialized_agents()
             
             # 创建新的 Swarm 实例
             self.create_swarm()
             
-            print("✅ Swarm 实例重新创建成功")
             return True
             
         except Exception as e:
-            print(f"❌ 重新创建 Swarm 实例失败: {e}")
             return False
     
     def get_swarm_lifecycle_info(self) -> Dict[str, Any]:
@@ -1905,7 +1672,6 @@ class MultiAgentSwarm:
         # 尝试多代理协作
         try:
             self.logger.log_info("启动多代理协作", {"question_preview": question[:100]})
-            print("🤖 启动多代理协作...")
             
             # 定义异步执行函数
             async def execute_swarm():
@@ -2340,7 +2106,6 @@ class MultiAgentSwarm:
         }
         
         self.logger.log_error("Swarm 执行超时", error_details)
-        print(f"⏰ Swarm 执行超时 ({timeout_value}秒)，尝试回退策略...")
         
         # 完成性能监控（标记为失败）
         self.performance_monitor.complete_task_execution(
@@ -2392,11 +2157,9 @@ class MultiAgentSwarm:
         }
         
         self.logger.log_error("Swarm 执行错误", error_details)
-        print(f"❌ Swarm 执行错误: {error}")
         
         # 检查是否为限流错误
         if ThrottlingDetector.is_throttling_error(error):
-            print("🚦 检测到限流错误，尝试智能重试...")
             return self._handle_throttling_error(error, question, execution_id, start_time)
         
         # 完成性能监控（标记为失败）
@@ -2406,25 +2169,20 @@ class MultiAgentSwarm:
         
         # 根据错误类型选择不同的回退策略
         if "agent" in str(error).lower() or "handoff" in str(error).lower():
-            print("🔄 检测到代理相关错误，尝试单代理模式回退...")
             return self._fallback_to_single_agent(question, execution_id, start_time, "agent_error")
         
         elif "timeout" in str(error).lower():
-            print("⏰ 检测到超时错误，尝试单代理模式回退...")
             return self._fallback_to_single_agent(question, execution_id, start_time, "timeout")
         
         elif "model" in str(error).lower() or "api" in str(error).lower():
-            print("🔧 检测到模型/API错误，尝试重新初始化后回退...")
             try:
                 # 尝试重新初始化模型
                 self.model = self._initialize_model()
                 return self._fallback_to_single_agent(question, execution_id, start_time, "model_error")
             except Exception as reinit_error:
                 self.logger.log_error("模型重新初始化失败", {"error": str(reinit_error)})
-                print(f"❌ 模型重新初始化失败: {reinit_error}")
         
         # 默认回退策略
-        print("🔄 尝试单代理模式回退...")
         return self._fallback_to_single_agent(question, execution_id, start_time, "general_error")
     
     def _handle_throttling_error(self, error: Exception, question: str, execution_id: str, start_time: datetime) -> Dict[str, Any]:
@@ -2448,7 +2206,6 @@ class MultiAgentSwarm:
             "execution_id": execution_id
         })
         
-        print("🚦 检测到API限流错误，启动智能重试机制...")
         
         try:
             # 使用限流处理器进行智能重试
@@ -2463,7 +2220,6 @@ class MultiAgentSwarm:
                 )
             )
             
-            print("✅ 限流重试成功，继续处理结果...")
             return self._process_swarm_result(swarm_result, question, execution_id, start_time)
             
         except Exception as retry_error:
@@ -2477,8 +2233,6 @@ class MultiAgentSwarm:
                 "execution_id": execution_id
             })
             
-            print(f"❌ 限流重试最终失败: {retry_error}")
-            print(f"📊 重试统计: 尝试了 {retry_stats.get('total_attempts', 0)} 次")
             
             # 完成性能监控（标记为失败）
             self.performance_monitor.complete_task_execution(
@@ -2486,7 +2240,6 @@ class MultiAgentSwarm:
             )
             
             # 回退到单代理模式
-            print("🔄 回退到单代理模式...")
             return self._fallback_to_single_agent(question, execution_id, start_time, "throttling_retry_failed")
     
     def _fallback_to_single_agent(self, question: str, execution_id: str, start_time: datetime, reason: str) -> Dict[str, Any]:
@@ -2511,7 +2264,6 @@ class MultiAgentSwarm:
                 "execution_id": execution_id
             })
             
-            print(f"🔄 启动单代理回退模式 (原因: {reason})...")
             
             # 创建单一的综合代理用于回退
             fallback_agent = self._create_fallback_agent()
@@ -2547,7 +2299,6 @@ class MultiAgentSwarm:
             }
             
             self.logger.log_info("单代理回退成功", fallback_details)
-            print(f"✅ 单代理回退成功 (耗时: {fallback_duration:.2f}秒)")
             
             # 更新性能监控
             self.performance_monitor.complete_task_execution(
@@ -2589,7 +2340,6 @@ class MultiAgentSwarm:
             }
             
             self.logger.log_error("单代理回退失败", error_details)
-            print(f"❌ 单代理回退失败: {fallback_error}")
             
             # 更新性能监控
             self.performance_monitor.complete_task_execution(
@@ -2684,7 +2434,6 @@ class MultiAgentSwarm:
         }
         
         self.logger.log_error("系统关键错误", error_details)
-        print(f"💥 系统关键错误: {error}")
         
         # 完成性能监控（如果已开始）
         if execution_id:
@@ -2697,12 +2446,10 @@ class MultiAgentSwarm:
         
         # 尝试最后的回退策略
         try:
-            print("🆘 尝试最后的回退策略...")
             return self._emergency_fallback(question, error, duration, end_time)
         except Exception as emergency_error:
             # 连紧急回退都失败了
             self.logger.log_error("紧急回退失败", {"emergency_error": str(emergency_error)})
-            print(f"💀 紧急回退失败: {emergency_error}")
             
             return {
                 "success": False,
@@ -2819,27 +2566,22 @@ class MultiAgentSwarm:
     def cleanup(self):
         """清理资源 - 完整的生命周期管理"""
         self.logger.log_info("开始清理 MultiAgentSwarm 资源")
-        print("🧹 开始清理 MultiAgentSwarm 资源...")
         
         # 清理 Swarm 实例
         try:
             if self.swarm:
                 self.logger.log_info("清理 Swarm 实例")
-                print("🧹 清理 Swarm 实例...")
                 self.destroy_swarm()
         except Exception as e:
             self.logger.log_error("清理 Swarm 时出错", {"error": str(e)})
-            print(f"⚠️  清理 Swarm 时出错: {e}")
         
         # 清理代理列表
         try:
             if self.agents:
                 self.logger.log_info(f"清理 {len(self.agents)} 个代理", {"agent_names": [a.name for a in self.agents]})
-                print(f"🧹 清理 {len(self.agents)} 个代理...")
                 self.agents.clear()
         except Exception as e:
             self.logger.log_error("清理代理时出错", {"error": str(e)})
-            print(f"⚠️  清理代理时出错: {e}")
         
         # 清理 MCP 连接
         try:
@@ -2848,10 +2590,8 @@ class MultiAgentSwarm:
                 try:
                     client.stop(None, None, None)
                     self.logger.log_info(f"{name} MCP连接已关闭")
-                    print(f"🧹 {name} MCP连接已关闭")
                 except Exception as e:
                     self.logger.log_error(f"关闭 {name} MCP连接时出错", {"error": str(e)})
-                    print(f"⚠️  关闭 {name} MCP连接时出错: {e}")
             
             self.mcp_clients.clear()
             self.mcp_tools.clear()
@@ -2861,7 +2601,6 @@ class MultiAgentSwarm:
                 
         except Exception as e:
             self.logger.log_error("清理 MCP 连接时出错", {"error": str(e)})
-            print(f"⚠️  清理 MCP 连接时出错: {e}")
         
         # 清理基础工具
         try:
@@ -2871,7 +2610,6 @@ class MultiAgentSwarm:
                 self.logger.log_info(f"清理了 {tools_count} 个基础工具")
         except Exception as e:
             self.logger.log_error("清理基础工具时出错", {"error": str(e)})
-            print(f"⚠️  清理基础工具时出错: {e}")
         
         # 清理性能监控系统
         try:
@@ -2880,7 +2618,6 @@ class MultiAgentSwarm:
                 self.performance_monitor.cleanup()
         except Exception as e:
             self.logger.log_error("清理性能监控系统时出错", {"error": str(e)})
-            print(f"⚠️  清理性能监控系统时出错: {e}")
         
         # 清理日志系统
         try:
@@ -2889,9 +2626,7 @@ class MultiAgentSwarm:
                 self.logger.log_info("MultiAgentSwarm 资源清理完成", session_summary)
                 self.logger.cleanup()
         except Exception as e:
-            print(f"⚠️  清理日志系统时出错: {e}")
         
-        print("✅ MultiAgentSwarm 资源清理完成")
     
     # 日志相关方法
     def get_logger(self) -> SwarmLogger:
@@ -2915,10 +2650,7 @@ class MultiAgentSwarm:
         try:
             log_level = LogLevel(level.upper())
             self.logger.set_log_level(log_level)
-            print(f"✅ 日志级别已设置为: {level.upper()}")
         except ValueError:
-            print(f"❌ 无效的日志级别: {level}")
-            print("可用级别: DEBUG, INFO, WARNING, ERROR, CRITICAL")
     
     def enable_strands_debug(self, enable: bool = True):
         """启用或禁用 Strands 官方调试日志
@@ -2931,7 +2663,6 @@ class MultiAgentSwarm:
         
         status = "启用" if enable else "禁用"
         self.logger.log_info(f"Strands 调试日志已{status}")
-        print(f"✅ Strands 调试日志已{status}")
     
     def get_log_files(self) -> Dict[str, str]:
         """获取日志文件路径"""
@@ -2963,12 +2694,10 @@ class MultiAgentSwarm:
                 json.dump(export_data, f, indent=2, ensure_ascii=False)
             
             self.logger.log_info(f"执行跟踪数据已导出", {"output_file": output_file})
-            print(f"✅ 执行跟踪数据已导出到: {output_file}")
             return output_file
             
         except Exception as e:
             self.logger.log_error(f"导出执行跟踪数据失败", {"error": str(e)})
-            print(f"❌ 导出失败: {e}")
             raise
     
     # 性能监控相关方法
@@ -3153,13 +2882,11 @@ class MultiAgentSwarm:
                 json.dump(report_dict, f, indent=2, ensure_ascii=False)
             
             self.logger.log_info(f"性能报告已生成", {"output_file": output_file})
-            print(f"✅ 性能报告已生成: {output_file}")
             
             return output_file
             
         except Exception as e:
             self.logger.log_error(f"生成性能报告失败", {"error": str(e)})
-            print(f"❌ 生成性能报告失败: {e}")
             raise
     
     def export_performance_metrics(self, output_file: str, format: str = 'json'):
@@ -3186,35 +2913,21 @@ class MultiAgentSwarm:
             agent_stats = self.get_agent_performance_stats()
             health_score = self.get_system_health_score()
             
-            print("\n" + "="*60)
-            print("📈 多代理系统性能摘要")
-            print("="*60)
             
-            print(f"🎯 系统健康评分: {health_score:.1f}/100")
-            print(f"📊 总任务数: {real_time_stats['total_tasks']}")
-            print(f"✅ 成功率: {real_time_stats['success_rate']:.1%}")
-            print(f"🔄 总移交次数: {real_time_stats['total_handoffs']}")
-            print(f"🔧 总工具调用: {real_time_stats['total_tool_calls']}")
             
-            print(f"\n🤖 代理性能 (共 {len(agent_stats)} 个):")
             for agent_name, stats in agent_stats.items():
                 if isinstance(stats, dict) and 'total_executions' in stats:
-                    print(f"  • {agent_name}: {stats['total_executions']} 次执行, "
                           f"成功率 {stats['success_rate']:.1%}, "
                           f"平均耗时 {stats['avg_execution_time']:.2f}s")
             
             # 显示移交模式
             handoff_patterns = self.get_handoff_patterns()
             if handoff_patterns:
-                print(f"\n🔄 主要移交模式:")
                 for pattern in sorted(handoff_patterns, key=lambda x: x['count'], reverse=True)[:3]:
-                    print(f"  • {pattern['from_agent']} → {pattern['to_agent']}: "
                           f"{pattern['count']} 次 (成功率 {pattern['success_rate']:.1%})")
             
-            print("="*60)
             
         except Exception as e:
-            print(f"❌ 打印性能摘要失败: {e}")
     
     def enable_performance_monitoring(self, enable: bool = True):
         """启用或禁用性能监控
@@ -3229,9 +2942,7 @@ class MultiAgentSwarm:
             
             status = "启用" if enable else "禁用"
             self.logger.log_info(f"性能监控已{status}")
-            print(f"✅ 性能监控已{status}")
         else:
-            print("❌ 性能监控器未初始化")
     
     def get_throttling_statistics(self) -> Dict[str, Any]:
         """
@@ -3264,7 +2975,6 @@ class MultiAgentSwarm:
         """
         try:
             if not hasattr(self, 'throttling_handler') or not self.throttling_handler:
-                print("❌ 限流处理器未初始化")
                 return
             
             config = self.throttling_handler.config
@@ -3279,15 +2989,8 @@ class MultiAgentSwarm:
                 try:
                     config.strategy = ThrottlingStrategy(strategy)
                 except ValueError:
-                    print(f"❌ 无效的重试策略: {strategy}")
-                    print("可用策略: exponential_backoff, linear_backoff, fixed_delay, adaptive")
                     return
             
-            print("✅ 限流处理配置已更新")
-            print(f"   - 初始延迟: {config.initial_delay}秒")
-            print(f"   - 最大延迟: {config.max_delay}秒")
-            print(f"   - 最大重试: {config.max_retries}次")
-            print(f"   - 重试策略: {config.strategy.value}")
             
             self.logger.log_info("限流处理配置已更新", {
                 "initial_delay": config.initial_delay,
@@ -3297,7 +3000,6 @@ class MultiAgentSwarm:
             })
             
         except Exception as e:
-            print(f"❌ 配置限流处理失败: {e}")
             self.logger.log_error("配置限流处理失败", {"error": str(e)})
     
     def clear_throttling_history(self):
@@ -3305,12 +3007,9 @@ class MultiAgentSwarm:
         try:
             if hasattr(self, 'throttling_handler') and self.throttling_handler:
                 self.throttling_handler.clear_history()
-                print("✅ 限流重试历史已清除")
                 self.logger.log_info("限流重试历史已清除")
             else:
-                print("❌ 限流处理器未初始化")
         except Exception as e:
-            print(f"❌ 清除限流历史失败: {e}")
             self.logger.log_error("清除限流历史失败", {"error": str(e)})
     
     def validate_system_configuration(self) -> Dict[str, Any]:
@@ -3329,7 +3028,6 @@ class MultiAgentSwarm:
         }
         
         try:
-            print("🔍 开始系统配置验证...")
             
             # 验证基础配置
             basic_config_result = self._validate_basic_configuration()
@@ -3380,7 +3078,6 @@ class MultiAgentSwarm:
             validation_result["issues"].append(error_msg)
             
             self.logger.log_error("配置验证失败", {"error": error_msg})
-            print(f"❌ {error_msg}")
             
             return validation_result
     
@@ -3565,9 +3262,6 @@ class MultiAgentSwarm:
         """打印验证结果"""
         status = validation_result["overall_status"]
         
-        print(f"\n{'='*60}")
-        print(f"🔍 系统配置验证结果")
-        print(f"{'='*60}")
         
         # 状态图标
         status_icons = {
@@ -3577,44 +3271,30 @@ class MultiAgentSwarm:
             "error": "💥"
         }
         
-        print(f"{status_icons.get(status, '❓')} 整体状态: {status.upper()}")
         
         # 组件状态
-        print(f"\n📋 组件状态:")
         for component_name, component_result in validation_result["components"].items():
             comp_status = component_result.get("status", "unknown")
             comp_icon = status_icons.get(comp_status, "❓")
-            print(f"  {comp_icon} {component_name}: {comp_status}")
         
         # 问题列表
         if validation_result["issues"]:
-            print(f"\n❌ 发现的问题 ({len(validation_result['issues'])} 个):")
             for i, issue in enumerate(validation_result["issues"], 1):
-                print(f"  {i}. {issue}")
         
         # 警告列表
         if validation_result["warnings"]:
-            print(f"\n⚠️  警告信息 ({len(validation_result['warnings'])} 个):")
             for i, warning in enumerate(validation_result["warnings"], 1):
-                print(f"  {i}. {warning}")
         
         # 建议列表
         if validation_result["recommendations"]:
-            print(f"\n💡 改进建议 ({len(validation_result['recommendations'])} 个):")
             for i, recommendation in enumerate(validation_result["recommendations"], 1):
-                print(f"  {i}. {recommendation}")
         
-        print(f"{'='*60}")
         
         # 根据状态提供总体建议
         if status == "failed":
-            print(f"🚨 系统存在严重配置问题，请修复后重新启动")
         elif status == "warning":
-            print(f"⚠️  系统可以运行，但建议修复警告项以获得最佳性能")
         elif status == "passed":
-            print(f"✅ 系统配置良好，可以正常运行")
         else:
-            print(f"❓ 配置验证过程中出现问题，请检查系统状态")
     
     def auto_fix_configuration(self) -> bool:
         """
@@ -3624,13 +3304,11 @@ class MultiAgentSwarm:
             修复是否成功
         """
         try:
-            print("🔧 开始自动修复配置问题...")
             
             # 先进行配置验证
             validation_result = self.validate_system_configuration()
             
             if validation_result["overall_status"] == "passed":
-                print("✅ 配置无需修复")
                 return True
             
             fixes_applied = []
@@ -3676,35 +3354,26 @@ class MultiAgentSwarm:
                 fixes_failed.append(f"重新创建Swarm失败: {e}")
             
             # 输出修复结果
-            print(f"\n🔧 自动修复完成:")
             
             if fixes_applied:
-                print(f"✅ 成功修复 ({len(fixes_applied)} 项):")
                 for fix in fixes_applied:
-                    print(f"  - {fix}")
             
             if fixes_failed:
-                print(f"❌ 修复失败 ({len(fixes_failed)} 项):")
                 for fix in fixes_failed:
-                    print(f"  - {fix}")
             
             # 再次验证
-            print(f"\n🔍 重新验证配置...")
             final_validation = self.validate_system_configuration()
             
             success = final_validation["overall_status"] in ["passed", "warning"]
             
             if success:
-                print(f"✅ 自动修复成功，系统配置已改善")
             else:
-                print(f"⚠️  自动修复部分成功，仍有问题需要手动处理")
             
             return success
             
         except Exception as e:
             error_msg = f"自动修复过程中发生错误: {e}"
             self.logger.log_error("自动修复失败", {"error": error_msg})
-            print(f"❌ {error_msg}")
             return False
 
 
@@ -3723,28 +3392,18 @@ def main():
     
     args = parser.parse_args()
     
-    print("🤖 多代理协作系统")
-    print("=" * 50)
     
     try:
         # 初始化多代理系统
-        print("🚀 正在初始化多代理系统...")
         swarm_system = MultiAgentSwarm(
             verbose=args.verbose,
             config_file=args.config
         )
         
-        print(f"✅ 系统初始化完成")
-        print(f"📊 模式: {'详细模式' if args.verbose else '简洁模式'}")
-        print(f"⚙️  配置文件: {args.config}")
-        print("=" * 50)
         
         if args.mode == "single" and args.question:
             # 单次问答模式
-            print(f"💬 问题: {args.question}")
             if args.system_prompt:
-                print(f"🎯 系统提示词: {args.system_prompt}")
-            print("-" * 30)
             
             response = swarm_system.process_question(
                 question=args.question,
@@ -3752,42 +3411,23 @@ def main():
             )
             
             if response.success:
-                print(f"\n✅ 回答:")
                 
                 # 调试信息：检查答案内容
-                print(f"🔍 调试信息:")
-                print(f"  - 答案类型: {type(response.answer).__name__}")
-                print(f"  - 答案长度: {len(response.answer) if response.answer else 0}")
-                print(f"  - 答案为空: {not response.answer or response.answer.strip() == ''}")
                 if hasattr(response, 'swarm_result') and response.swarm_result:
-                    print(f"  - Swarm结果类型: {type(response.swarm_result).__name__}")
-                    print(f"  - Swarm结果有状态: {hasattr(response.swarm_result, 'status')}")
                     if hasattr(response.swarm_result, 'status'):
-                        print(f"  - Swarm状态: {response.swarm_result.status.value}")
                 
                 # 显示答案
                 if response.answer and response.answer.strip():
-                    print(f"\n📝 最终答案:")
-                    print(response.answer)
                 else:
-                    print("⚠️  答案为空或未正确提取")
                     
                     # 如果答案为空，尝试从原始结果中提取更多信息
                     if hasattr(response, 'swarm_result') and response.swarm_result:
-                        print("🔧 尝试从原始结果中提取信息...")
                         debug_info = swarm_system._debug_swarm_result_structure(response.swarm_result)
-                        print(f"📋 Swarm结果结构: {debug_info}")
                 
-                print(f"\n📊 执行统计:")
-                print(f"  - 耗时: {response.duration:.2f}秒")
-                print(f"  - 代理路径: {' → '.join(response.agent_path) if response.agent_path else '单代理处理'}")
             else:
-                print(f"\n❌ 处理失败: {response.answer}")
         
         else:
             # 交互模式
-            print("💡 交互模式 - 输入 'quit' 退出，'help' 查看帮助")
-            print("=" * 50)
             
             while True:
                 try:
@@ -3799,14 +3439,12 @@ def main():
                     
                     # 处理特殊命令
                     if question.lower() == 'quit':
-                        print("👋 再见！")
                         break
                     elif question.lower() == 'help':
                         print_help()
                         continue
                     elif question.lower() == 'verbose':
                         swarm_system.verbose = not swarm_system.verbose
-                        print(f"🔧 详细模式: {'启用' if swarm_system.verbose else '禁用'}")
                         continue
                     elif question.lower() == 'status':
                         print_system_status(swarm_system)
@@ -3815,7 +3453,6 @@ def main():
                     # 获取系统提示词（可选）
                     system_prompt = input("🎯 系统提示词 (可选，直接回车跳过): ").strip()
                     
-                    print("🤖 思考中...")
                     
                     # 处理问题
                     response = swarm_system.process_question(
@@ -3825,51 +3462,31 @@ def main():
                     
                     # 显示结果 - 添加详细的调试信息
                     if response.success:
-                        print(f"\n✅ 回答:")
                         
                         # 调试信息：检查答案内容
                         if swarm_system.verbose:
-                            print(f"🔍 调试信息:")
-                            print(f"  - 答案类型: {type(response.answer).__name__}")
-                            print(f"  - 答案长度: {len(response.answer) if response.answer else 0}")
-                            print(f"  - 答案为空: {not response.answer or response.answer.strip() == ''}")
                             if hasattr(response, 'swarm_result') and response.swarm_result:
-                                print(f"  - Swarm结果类型: {type(response.swarm_result).__name__}")
-                                print(f"  - Swarm结果有状态: {hasattr(response.swarm_result, 'status')}")
                                 if hasattr(response.swarm_result, 'status'):
-                                    print(f"  - Swarm状态: {response.swarm_result.status.value}")
                         
                         # 显示答案
                         if response.answer and response.answer.strip():
-                            print(response.answer)
                         else:
-                            print("⚠️  答案为空或未正确提取")
                             
                             # 如果答案为空，尝试从原始结果中提取更多信息
                             if hasattr(response, 'swarm_result') and response.swarm_result:
-                                print("🔧 尝试从原始结果中提取信息...")
                                 debug_info = swarm_system._debug_swarm_result_structure(response.swarm_result)
-                                print(f"📋 Swarm结果结构: {debug_info}")
                         
                         if swarm_system.verbose:
-                            print(f"\n📊 执行统计:")
-                            print(f"  - 耗时: {response.duration:.2f}秒")
-                            print(f"  - 代理路径: {' → '.join(response.agent_path) if response.agent_path else '单代理处理'}")
-                            print(f"  - 时间戳: {response.timestamp}")
                     else:
-                        print(f"\n❌ 处理失败: {response.answer}")
                 
                 except KeyboardInterrupt:
-                    print("\n\n👋 用户中断，再见！")
                     break
                 except Exception as e:
-                    print(f"\n❌ 发生错误: {e}")
                     if args.verbose:
                         import traceback
                         traceback.print_exc()
     
     except Exception as e:
-        print(f"❌ 系统初始化失败: {e}")
         if args.verbose:
             import traceback
             traceback.print_exc()
@@ -3915,33 +3532,20 @@ def print_help():
   - 网络搜索、JSON处理
   - 浏览器操作等
 """
-    print(help_text)
 
 
 def print_system_status(swarm_system):
     """显示系统状态"""
     try:
-        print("\n📊 系统状态:")
-        print(f"  - 模型: {swarm_system.model.config.get('model_id', 'Unknown')}")
-        print(f"  - 代理数量: {len(swarm_system.agents)}")
-        print(f"  - MCP工具: {len(swarm_system.mcp_tools)}")
-        print(f"  - 基础工具: {len(swarm_system.basic_tools)}")
-        print(f"  - 详细模式: {'启用' if swarm_system.verbose else '禁用'}")
-        print(f"  - 配置文件: {swarm_system.config_file}")
         
         # 显示代理状态
-        print(f"\n🤖 代理状态:")
         for agent in swarm_system.agents:
-            print(f"  - {agent.name}: ✅ 正常")
         
         # 显示Swarm状态
         if swarm_system.swarm:
-            print(f"\n🔄 Swarm状态: ✅ 已创建")
         else:
-            print(f"\n🔄 Swarm状态: ❌ 未创建")
     
     except Exception as e:
-        print(f"❌ 获取系统状态失败: {e}")
 
 
 if __name__ == "__main__":
