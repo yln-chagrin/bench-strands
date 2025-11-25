@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "exa": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.exa.ai/mcp?exaApiKey=feb88d8d-0d6a-49bf-b48a-59193dc7924e"],
+      "env": {
+        "EXA_API_KEY": "feb88d8d-0d6a-49bf-b48a-59193dc7924e"
+      },
+      "disabled": false,
+      "autoApprove": ["web_search_exa"]
+    },
+    "json": {
+      "command": "node",
+      "args": [
+        "/Users/liniyuan/mcp/JSON-MCP-Server/build/index.js"
+      ]
+    }
+  }
+}
