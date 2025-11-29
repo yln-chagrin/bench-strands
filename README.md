@@ -1,4 +1,4 @@
-# Strands Agent -- Swarm
+# Strands Agents -- Swarm
 
 An intelligent AI agent system built on Strands Agents SDK, supporting both single-agent and multi-agent collaboration modes with MCP integration.
 
